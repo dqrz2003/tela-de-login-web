@@ -3,6 +3,12 @@
  * LÓGICA DO PAINEL DO USUÁRIO & GUARDA DE AUTENTICAÇÃO (dashboard.js)
  * ============================================================================
  */
+
+// URL base da API no Render com fallback para desenvolvimento local
+const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:3000'
+  : 'https://tela-de-login-web.onrender.com';
+
 document.addEventListener('DOMContentLoaded', async () => {
   const loadingEl = document.getElementById('auth-loading');
   const contentEl = document.getElementById('dashboard-content');
@@ -34,12 +40,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /**
-   * Valida a sessão atual com o backend
+   * Valida a sessão atual com o backend no Render
    */
   async function verifySession() {
     try {
-      const response = await fetch('/api/me', {
+      const response = await fetch(`${API_BASE_URL}/api/me`, {
         method: 'GET',
+        credentials: 'include', // Essencial para cross-origin requests
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -104,8 +111,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       btnLogout.innerHTML = '<span>Saindo...</span>';
 
       try {
-        await fetch('/api/logout', {
+        await fetch(`${API_BASE_URL}/api/logout`, {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Authorization': `Bearer ${token}`
           }

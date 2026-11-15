@@ -1,281 +1,280 @@
 // ============================================================================
-// SERVIDOR WEB & API REST SEGURA (server.js)
-// Executável nativamente com: node server.js (sem dependências externas)
+// SERVIDOR WEB & API REST SEGURA (server.js) - EXPRESS & CORS
+// Configurado para suportar frontend no GitHub Pages e backend no Render
 // ============================================================================
-const http = require('node:http');
-const fs = require('node:fs');
+const express = require('express');
+const cors = require('cors');
 const path = require('node:path');
 const db = require('./database.js');
 const auth = require('./auth.js');
 
+const app = express();
 const PORT = process.env.PORT || 3000;
+const isProd = process.env.NODE_ENV === 'production';
 
-// Tipos MIME para arquivos estáticos
-const MIME_TYPES = {
-  '.html': 'text/html; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.js': 'application/javascript; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
-  '.svg': 'image/svg+xml',
-  '.png': 'image/png',
-  '.ico': 'image/x-icon'
-};
+// Confia no primeiro proxy reverso (essencial no Render para HTTPS e cookies seguros)
+app.set('trust proxy', 1);
 
-/**
- * Lê o corpo da requisição JSON de forma segura com limite de tamanho (1MB).
- */
-function parseRequestBody(req) {
-  return new Promise((resolve, reject) => {
-    let body = '';
-    const MAX_SIZE = 1e6; // 1MB
+// ============================================================================
+// CONFIGURAÇÃO DE CORS (Cross-Origin Resource Sharing)
+// ============================================================================
+const allowedOrigins = [
+  'https://dqrz2003.github.io',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500'
+];
 
-    req.on('data', chunk => {
-      body += chunk;
-      if (body.length > MAX_SIZE) {
-        reject(new Error('Payload Too Large'));
-      }
-    });
-
-    req.on('end', () => {
-      if (!body) return resolve({});
-      try {
-        resolve(JSON.parse(body));
-      } catch (err) {
-        reject(new Error('Invalid JSON'));
-      }
-    });
-
-    req.on('error', err => reject(err));
-  });
-}
-
-/**
- * Envia resposta formatada em JSON com cabeçalhos de segurança.
- */
-function sendJson(res, statusCode, data) {
-  res.writeHead(statusCode, {
-    'Content-Type': 'application/json; charset=utf-8',
-    'X-Content-Type-Options': 'nosniff',
-    'X-Frame-Options': 'DENY',
-    'Referrer-Policy': 'strict-origin-when-cross-origin'
-  });
-  res.end(JSON.stringify(data));
-}
-
-/**
- * Serve arquivos estáticos (HTML, CSS, JS).
- */
-function serveStaticFile(res, filePath) {
-  const ext = path.extname(filePath).toLowerCase();
-  const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-
-  fs.readFile(filePath, (err, content) => {
-    if (err) {
-      if (err.code === 'ENOENT') {
-        res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-        res.end('Arquivo não encontrado');
-      } else {
-        res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
-        res.end('Erro interno no servidor');
-      }
-      return;
+app.use(cors({
+  origin: function (origin, callback) {
+    // Permite requisições sem origin (mobile apps, curl, etc.) ou se estiver na lista/GitHub Pages
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.github.io')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Bloqueado pelas políticas de CORS'));
     }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
 
-    res.writeHead(200, {
-      'Content-Type': contentType,
-      'X-Content-Type-Options': 'nosniff',
-      'X-Frame-Options': 'DENY'
-    });
-    res.end(content);
+// Parser para corpo em formato JSON com limite seguro
+app.use(express.json({ limit: '1mb' }));
+
+// Cabeçalhos globais de segurança
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+// ============================================================================
+// ROTAS DA API
+// ============================================================================
+
+/**
+ * Health check da API
+ */
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    environment: isProd ? 'production' : 'development'
   });
-}
+});
 
-const requestHandler = async (req, res) => {
-  const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-  const pathname = url.pathname;
-
+/**
+ * ROTA: CADASTRO DE NOVO USUÁRIO (POST /api/register)
+ */
+app.post('/api/register', async (req, res) => {
   try {
-    // ------------------------------------------------------------------------
-    // ROTA: CADASTRO DE NOVO USUÁRIO (POST /api/register)
-    // ------------------------------------------------------------------------
-    if (req.method === 'POST' && pathname === '/api/register') {
-      const body = await parseRequestBody(req);
-      const email = auth.sanitizeEmail(body.email);
-      const password = body.password;
+    const email = auth.sanitizeEmail(req.body.email);
+    const password = req.body.password;
 
-      if (!email) {
-        return sendJson(res, 400, { 
-          success: false, 
-          message: 'Por favor, forneça um endereço de e-mail válido.' 
-        });
-      }
-
-      if (!password || typeof password !== 'string' || password.length < 6) {
-        return sendJson(res, 400, { 
-          success: false, 
-          message: 'A senha deve conter no mínimo 6 caracteres.' 
-        });
-      }
-
-      // Verifica se o usuário já existe
-      const existingUser = db.getUserByEmail(email);
-      if (existingUser) {
-        return sendJson(res, 409, { 
-          success: false, 
-          message: 'Este e-mail já está cadastrado no sistema.' 
-        });
-      }
-
-      // Hash seguro da senha com scrypt + salt único
-      const passwordHash = await auth.hashPassword(password);
-      const userId = db.createUser(email, passwordHash);
-
-      return sendJson(res, 201, {
-        success: true,
-        message: 'Usuário cadastrado com sucesso!',
-        userId
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Por favor, forneça um endereço de e-mail válido.'
       });
     }
 
-    // ------------------------------------------------------------------------
-    // ROTA: LOGIN DE USUÁRIO (POST /api/login)
-    // ------------------------------------------------------------------------
-    if (req.method === 'POST' && pathname === '/api/login') {
-      const body = await parseRequestBody(req);
-      const email = auth.sanitizeEmail(body.email);
-      const password = body.password;
-
-      if (!email || !password) {
-        return sendJson(res, 400, { 
-          success: false, 
-          message: 'E-mail e senha são obrigatórios.' 
-        });
-      }
-
-      const user = db.getUserByEmail(email);
-
-      // Proteção contra enumeração de usuários (timing consistente)
-      if (!user) {
-        // Gera um hash fictício para mitigar timing attack de usuário inexistente
-        await auth.hashPassword('dummy_password_timing_defense');
-        return sendJson(res, 401, { 
-          success: false, 
-          message: 'E-mail ou senha incorretos.' 
-        });
-      }
-
-      // Verifica se a conta está temporariamente bloqueada por excesso de tentativas
-      if (user.locked_until && new Date(user.locked_until) > new Date()) {
-        const remainingMinutes = Math.ceil((new Date(user.locked_until) - new Date()) / 60000);
-        return sendJson(res, 423, {
-          success: false,
-          message: `Conta temporariamente bloqueada por segurança devido a excesso de tentativas incorretas. Tente novamente em ${remainingMinutes} minuto(s).`
-        });
-      }
-
-      // Validação de senha segura com timingSafeEqual
-      const isPasswordValid = await auth.verifyPassword(password, user.password_hash);
-
-      if (!isPasswordValid) {
-        // Incrementa falhas e aplica bloqueio após 5 erros
-        db.recordFailedAttempt(user.id);
-        return sendJson(res, 401, { 
-          success: false, 
-          message: 'E-mail ou senha incorretos.' 
-        });
-      }
-
-      // Login bem-sucedido: reseta contador de tentativas falhas
-      db.resetFailedAttempts(user.id);
-
-      // Cria token de sessão segura
-      const sessionToken = auth.generateSessionToken();
-      db.createSession(user.id, sessionToken, 24);
-
-      return sendJson(res, 200, {
-        success: true,
-        message: 'Autenticação realizada com sucesso!',
-        token: sessionToken,
-        user: {
-          id: user.id,
-          email: user.email
-        }
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'A senha deve conter no mínimo 6 caracteres.'
       });
     }
 
-    // ------------------------------------------------------------------------
-    // ROTA: VERIFICAÇÃO DE SESSÃO ATIVA (GET /api/me)
-    // ------------------------------------------------------------------------
-    if (req.method === 'GET' && pathname === '/api/me') {
-      const authHeader = req.headers['authorization'];
-      const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
-
-      if (!token) {
-        return sendJson(res, 401, { success: false, message: 'Não autorizado.' });
-      }
-
-      const session = db.getSession(token);
-      if (!session) {
-        return sendJson(res, 401, { success: false, message: 'Sessão inválida ou expirada.' });
-      }
-
-      return sendJson(res, 200, {
-        success: true,
-        user: {
-          id: session.user_id,
-          email: session.email,
-          createdAt: session.created_at,
-          expiresAt: session.expires_at
-        }
+    // Verifica se o usuário já existe
+    const existingUser = db.getUserByEmail(email);
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: 'Este e-mail já está cadastrado no sistema.'
       });
     }
 
-    // ------------------------------------------------------------------------
-    // ROTA: LOGOUT (POST /api/logout)
-    // ------------------------------------------------------------------------
-    if (req.method === 'POST' && pathname === '/api/logout') {
-      const authHeader = req.headers['authorization'];
-      const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    // Hash criptográfico da senha com scrypt + salt único
+    const passwordHash = await auth.hashPassword(password);
+    const userId = db.createUser(email, passwordHash);
 
-      if (token) {
-        db.deleteSession(token);
-      }
-
-      return sendJson(res, 200, {
-        success: true,
-        message: 'Sessão encerrada com sucesso.'
-      });
-    }
-
-    // ------------------------------------------------------------------------
-    // ARQUIVOS ESTÁTICOS DO FRONTEND
-    // ------------------------------------------------------------------------
-    let filePath = path.join(__dirname, pathname === '/' ? 'index.html' : pathname);
-    
-    // Previne Directory Traversal
-    if (!filePath.startsWith(__dirname)) {
-      res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
-      return res.end('Acesso negado');
-    }
-
-    serveStaticFile(res, filePath);
-
+    return res.status(201).json({
+      success: true,
+      message: 'Usuário cadastrado com sucesso!',
+      userId
+    });
   } catch (error) {
-    console.error('Erro na requisição:', error);
-    sendJson(res, 500, { 
-      success: false, 
-      message: 'Ocorreu um erro interno no servidor.' 
+    console.error('Erro no cadastro:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Ocorreu um erro interno no servidor.'
     });
   }
-};
+});
 
-const server = http.createServer(requestHandler);
+/**
+ * ROTA: LOGIN DE USUÁRIO (POST /api/login)
+ */
+app.post('/api/login', async (req, res) => {
+  try {
+    const email = auth.sanitizeEmail(req.body.email);
+    const password = req.body.password;
 
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'E-mail e senha são obrigatórios.'
+      });
+    }
+
+    const user = db.getUserByEmail(email);
+
+    // Proteção contra enumeração de usuários (timing consistente)
+    if (!user) {
+      await auth.hashPassword('dummy_password_timing_defense');
+      return res.status(401).json({
+        success: false,
+        message: 'E-mail ou senha incorretos.'
+      });
+    }
+
+    // Verifica se a conta está temporariamente bloqueada por excesso de tentativas
+    if (user.locked_until && new Date(user.locked_until) > new Date()) {
+      const remainingMinutes = Math.ceil((new Date(user.locked_until) - new Date()) / 60000);
+      return res.status(423).json({
+        success: false,
+        message: `Conta temporariamente bloqueada por segurança devido a excesso de tentativas incorretas. Tente novamente em ${remainingMinutes} minuto(s).`
+      });
+    }
+
+    // Validação de senha segura com timingSafeEqual
+    const isPasswordValid = await auth.verifyPassword(password, user.password_hash);
+
+    if (!isPasswordValid) {
+      db.recordFailedAttempt(user.id);
+      return res.status(401).json({
+        success: false,
+        message: 'E-mail ou senha incorretos.'
+      });
+    }
+
+    // Login bem-sucedido: reseta contador de tentativas falhas
+    db.resetFailedAttempts(user.id);
+
+    // Cria token de sessão segura
+    const sessionToken = auth.generateSessionToken();
+    db.createSession(user.id, sessionToken, 24);
+
+    // Define cookie seguro com sameSite='none' em produção para requisições cross-domain
+    res.cookie('auth_token', sessionToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000 // 24 horas
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Autenticação realizada com sucesso!',
+      token: sessionToken,
+      user: {
+        id: user.id,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error('Erro no login:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Ocorreu um erro interno no servidor.'
+    });
+  }
+});
+
+/**
+ * Função auxiliar para extrair o token do cabeçalho Bearer ou do cookie
+ */
+function extractToken(req) {
+  const authHeader = req.headers['authorization'];
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.slice(7);
+  }
+  if (req.headers.cookie) {
+    const match = req.headers.cookie.match(/auth_token=([^;]+)/);
+    if (match) return match[1];
+  }
+  return null;
+}
+
+/**
+ * ROTA: VERIFICAÇÃO DE SESSÃO ATIVA (GET /api/me)
+ */
+app.get('/api/me', (req, res) => {
+  const token = extractToken(req);
+
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Não autorizado.' });
+  }
+
+  const session = db.getSession(token);
+  if (!session) {
+    return res.status(401).json({ success: false, message: 'Sessão inválida ou expirada.' });
+  }
+
+  return res.status(200).json({
+    success: true,
+    user: {
+      id: session.user_id,
+      email: session.email,
+      createdAt: session.created_at,
+      expiresAt: session.expires_at
+    }
+  });
+});
+
+/**
+ * ROTA: LOGOUT (POST /api/logout)
+ */
+app.post('/api/logout', (req, res) => {
+  const token = extractToken(req);
+
+  if (token) {
+    db.deleteSession(token);
+  }
+
+  // Limpa o cookie de autenticação
+  res.clearCookie('auth_token', {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax'
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: 'Sessão encerrada com sucesso.'
+  });
+});
+
+// ============================================================================
+// ARQUIVOS ESTÁTICOS & PÁGINA INICIAL
+// ============================================================================
+app.use(express.static(__dirname));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Inicialização do servidor
 if (require.main === module) {
-  server.listen(PORT, () => {
+  app.listen(PORT, () => {
     console.log(`Servidor de autenticação rodando em: http://localhost:${PORT}`);
+    console.log(`Ambiente: ${isProd ? 'production' : 'development'}`);
+    console.log(`Origem permitida CORS: https://dqrz2003.github.io`);
     console.log(`Banco de dados SQLite ativo: ${path.join(__dirname, 'users.db')}`);
   });
 }
 
-module.exports = { server, requestHandler };
+module.exports = { app, server: app, requestHandler: app };

@@ -3,6 +3,12 @@
  * SCRIPT FRONTEND: INTEGRAÇÃO COM A API E BANCO DE DADOS
  * ============================================================================
  */
+
+// URL base da API no Render com fallback para desenvolvimento local
+const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:3000'
+  : 'https://tela-de-login-web.onrender.com';
+
 document.addEventListener('DOMContentLoaded', () => {
   // Elementos do DOM
   const loginForm = document.querySelector('.login-form');
@@ -47,8 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (socialDivider) socialDivider.style.display = 'none';
       if (socialGroup) socialGroup.style.display = 'none';
     } else {
-      formTitle.textContent = 'Bem-vindo(a) de volta';
-      formSubtitle.textContent = 'Insira suas credenciais para acessar sua conta.';
+      formTitle.textContent = 'Bem-vindo(a)';
+      formSubtitle.textContent = 'Digite suas credenciais para continuar.';
       btnSubmitText.textContent = 'Entrar';
       togglePromptText.textContent = 'Não tem uma conta?';
       toggleModeBtn.textContent = 'Cadastre-se';
@@ -104,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
-  // ENVIO DO FORMULÁRIO COM FETCH PARA O BACKEND
+  // ENVIO DO FORMULÁRIO COM FETCH PARA O BACKEND (RENDER / LOCAL)
   // --------------------------------------------------------------------------
   if (loginForm) {
     loginForm.addEventListener('submit', async (event) => {
@@ -142,16 +148,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (hasClientError) return;
 
-      // Prepara envio
+      // Prepara envio com destino para a API no Render
       const endpoint = currentMode === 'register' ? '/api/register' : '/api/login';
-      const originalBtnText = btnSubmitText.textContent;
+      const targetUrl = `${API_BASE_URL}${endpoint}`;
       
       btnSubmit.disabled = true;
       btnSubmitText.textContent = currentMode === 'register' ? 'Cadastrando...' : 'Autenticando...';
 
       try {
-        const response = await fetch(endpoint, {
+        const response = await fetch(targetUrl, {
           method: 'POST',
+          credentials: 'include', // Essencial para comunicação cross-origin com cookies/sessões
           headers: {
             'Content-Type': 'application/json'
           },
@@ -168,7 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Sucesso
         if (currentMode === 'register') {
           showAlert('Conta criada com sucesso! Agora você já pode fazer login.', 'success');
-          // Alterna para o modo de login mantendo o e-mail preenchido
           setMode('login');
           passwordInput.value = '';
           passwordInput.focus();
@@ -182,8 +188,11 @@ document.addEventListener('DOMContentLoaded', () => {
           }, 800);
         }
       } catch (err) {
-        console.error('Erro de conexão:', err);
-        showAlert('Não foi possível conectar ao servidor. Certifique-se de iniciar o servidor com "node server.js".', 'error');
+        console.error('Erro de conexão com a API:', err);
+        showAlert(
+          'Não foi possível conectar ao servidor no Render. Se a API estiver em repouso (plano gratuito), pode levar cerca de 40 segundos para acordar. Tente novamente em instantes.',
+          'error'
+        );
       } finally {
         btnSubmit.disabled = false;
         btnSubmitText.textContent = currentMode === 'register' ? 'Cadastrar' : 'Entrar';

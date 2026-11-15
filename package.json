@@ -7,7 +7,17 @@
     "start": "node server.js",
     "test": "node --test tests/test-suite.js tests/api.test.js"
   },
-  "keywords": ["login", "sqlite", "auth", "scrypt", "security"],
+  "keywords": [
+    "login",
+    "sqlite",
+    "auth",
+    "scrypt",
+    "security"
+  ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.3.0"
+  }
 }

@@ -1,21 +1,23 @@
 // ============================================================================
-// TESTES DE API HTTP EM MEMÓRIA (tests/api.test.js)
-// Testa as rotas REST (/api/register, /api/login, /api/me)
+// TESTES DE INTEGRAÇÃO DA API EXPRESS EM MEMÓRIA (tests/api.test.js)
 // ============================================================================
 const { test, describe } = require('node:test');
 const assert = require('node:assert/strict');
 const { Readable } = require('node:stream');
 const { EventEmitter } = require('node:events');
-const { requestHandler } = require('../server.js');
+const http = require('node:http');
+const { app } = require('../server.js');
 
 /**
- * Cria mocks leves de Request e Response para testar o handler HTTP in-process.
+ * Cria mocks compatíveis com Express e Node.js HTTP para testar a aplicação in-process.
  */
 function createMockHttp(method, urlPath, body = null, headers = {}) {
+  const payload = body ? JSON.stringify(body) : '';
+
   const req = new Readable({
     read() {
-      if (body) {
-        this.push(JSON.stringify(body));
+      if (payload) {
+        this.push(payload);
       }
       this.push(null);
     }
@@ -23,33 +25,41 @@ function createMockHttp(method, urlPath, body = null, headers = {}) {
 
   req.method = method;
   req.url = urlPath;
-  req.headers = { host: 'localhost', ...headers };
-
-  const res = new EventEmitter();
-  res.statusCode = 200;
-  res.headers = {};
-  res.body = '';
-
-  res.writeHead = (statusCode, headers = {}) => {
-    res.statusCode = statusCode;
-    Object.assign(res.headers, headers);
+  req.headers = {
+    host: 'localhost',
+    'content-type': 'application/json',
+    'content-length': Buffer.byteLength(payload),
+    ...headers
   };
 
+  const res = new http.ServerResponse(req);
+  res.body = '';
+
   const responsePromise = new Promise((resolve) => {
-    res.end = (chunk) => {
-      if (chunk) res.body += chunk;
+    // Intercepta dados enviados
+    const originalWrite = res.write;
+    const originalEnd = res.end;
+
+    res.write = function (chunk, ...args) {
+      if (chunk) res.body += chunk.toString();
+      return originalWrite.apply(this, [chunk, ...args]);
+    };
+
+    res.end = function (chunk, ...args) {
+      if (chunk) res.body += chunk.toString();
       let parsedBody = res.body;
       try {
         parsedBody = JSON.parse(res.body);
       } catch {}
-      resolve({ statusCode: res.statusCode, headers: res.headers, body: parsedBody });
+      resolve({ statusCode: res.statusCode, headers: res.getHeaders(), body: parsedBody });
+      return originalEnd.apply(this, [chunk, ...args]);
     };
   });
 
   return { req, res, responsePromise };
 }
 
-describe('🌐 Testes de Integração da API HTTP (server.js)', () => {
+describe('🌐 Testes de Integração da API Express (server.js)', () => {
   const uniqueEmail = `cliente_${Date.now()}@teste.com`;
   const validPassword = 'SenhaForte2026!';
   let authToken = '';
@@ -60,7 +70,7 @@ describe('🌐 Testes de Integração da API HTTP (server.js)', () => {
       password: validPassword
     });
 
-    requestHandler(req, res);
+    app(req, res);
     const response = await responsePromise;
 
     assert.equal(response.statusCode, 201);
@@ -74,7 +84,7 @@ describe('🌐 Testes de Integração da API HTTP (server.js)', () => {
       password: validPassword
     });
 
-    requestHandler(req, res);
+    app(req, res);
     const response = await responsePromise;
 
     assert.equal(response.statusCode, 400);
@@ -87,7 +97,7 @@ describe('🌐 Testes de Integração da API HTTP (server.js)', () => {
       password: '123'
     });
 
-    requestHandler(req, res);
+    app(req, res);
     const response = await responsePromise;
 
     assert.equal(response.statusCode, 400);
@@ -100,7 +110,7 @@ describe('🌐 Testes de Integração da API HTTP (server.js)', () => {
       password: 'OutraSenha123'
     });
 
-    requestHandler(req, res);
+    app(req, res);
     const response = await responsePromise;
 
     assert.equal(response.statusCode, 409);
@@ -114,7 +124,7 @@ describe('🌐 Testes de Integração da API HTTP (server.js)', () => {
       password: validPassword
     });
 
-    requestHandler(req, res);
+    app(req, res);
     const response = await responsePromise;
 
     assert.equal(response.statusCode, 200);
@@ -129,7 +139,7 @@ describe('🌐 Testes de Integração da API HTTP (server.js)', () => {
       password: 'SenhaCompletamenteIncorreta'
     });
 
-    requestHandler(req, res);
+    app(req, res);
     const response = await responsePromise;
 
     assert.equal(response.statusCode, 401);
@@ -143,7 +153,7 @@ describe('🌐 Testes de Integração da API HTTP (server.js)', () => {
       password: 'QualquerSenha123'
     });
 
-    requestHandler(req, res);
+    app(req, res);
     const response = await responsePromise;
 
     assert.equal(response.statusCode, 401);
@@ -156,7 +166,7 @@ describe('🌐 Testes de Integração da API HTTP (server.js)', () => {
       authorization: `Bearer ${authToken}`
     });
 
-    requestHandler(req, res);
+    app(req, res);
     const response = await responsePromise;
 
     assert.equal(response.statusCode, 200);
@@ -168,7 +178,7 @@ describe('🌐 Testes de Integração da API HTTP (server.js)', () => {
   test('GET /api/me - Deve rejeitar requisição sem token (401 Unauthorized)', async () => {
     const { req, res, responsePromise } = createMockHttp('GET', '/api/me');
 
-    requestHandler(req, res);
+    app(req, res);
     const response = await responsePromise;
 
     assert.equal(response.statusCode, 401);
@@ -180,7 +190,7 @@ describe('🌐 Testes de Integração da API HTTP (server.js)', () => {
       authorization: `Bearer ${authToken}`
     });
 
-    requestHandler(req, res);
+    app(req, res);
     const response = await responsePromise;
 
     assert.equal(response.statusCode, 200);
@@ -190,7 +200,7 @@ describe('🌐 Testes de Integração da API HTTP (server.js)', () => {
     const { req: checkReq, res: checkRes, responsePromise: checkPromise } = createMockHttp('GET', '/api/me', null, {
       authorization: `Bearer ${authToken}`
     });
-    requestHandler(checkReq, checkRes);
+    app(checkReq, checkRes);
     const checkResponse = await checkPromise;
 
     assert.equal(checkResponse.statusCode, 401, 'Token revogado não deve mais autenticar');
