@@ -1,0 +1,720 @@
+/* ==========================================================================
+   DESIGN MODERNO: LARANJA & BRANCO | FRAMELESS | MOTION DESIGN
+   ========================================================================== */
+
+:root {
+  /* Paleta Laranja & Branco */
+  --orange-50: #fff7ed;
+  --orange-100: #ffedd5;
+  --orange-200: #fed7aa;
+  --orange-300: #fdba74;
+  --orange-400: #fb923c;
+  --orange-500: #ff6200; /* Laranja Primário Vibrante */
+  --orange-600: #ea580c;
+  --orange-700: #c2410c;
+  --orange-glow: rgba(255, 98, 0, 0.3);
+  --orange-subtle: rgba(255, 98, 0, 0.08);
+
+  --color-white: #ffffff;
+  --color-bg: #fffbf7; /* Branco quente com toque pêssego suave */
+  --color-surface: #ffffff;
+  --color-surface-subtle: #fbf7f2;
+  --color-surface-translucent: rgba(255, 255, 255, 0.75);
+  --color-input-bg: rgba(255, 255, 255, 0.9);
+  --color-border: #e7e5e4;
+  --color-border-hover: #d6d3d1;
+  --color-text-primary: #1c1917;
+  --color-text-secondary: #78716c;
+  --color-text-muted: #a8a29e;
+  
+  --primary: var(--orange-500);
+  --primary-hover: #ff741a;
+  --primary-active: #e04e00;
+  --primary-subtle: var(--orange-subtle);
+  --primary-gradient: linear-gradient(135deg, #ff7a18 0%, #ff5500 50%, #e04400 100%);
+  --primary-gradient-hover: linear-gradient(135deg, #ff8b38 0%, #ff661a 50%, #f04e00 100%);
+
+  --color-error: #ef4444;
+  --color-error-bg: #fef2f2;
+  --color-success: #10b981;
+  --color-success-bg: #ecfdf5;
+
+  /* Tipografia & Formatos */
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-full: 9999px;
+  
+  /* Motion & Transições */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.2s var(--ease-smooth);
+  --transition-bounce: 0.35s var(--ease-spring);
+}
+
+/* Modo Escuro Integrado */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0d0b09; /* Obsidian profundo quente */
+    --color-surface: #171310;
+    --color-surface-subtle: #241e1a;
+    --color-surface-translucent: rgba(26, 22, 19, 0.7);
+    --color-input-bg: rgba(26, 22, 19, 0.85);
+    --color-border: #292524;
+    --color-border-hover: #44403c;
+    --color-text-primary: #fcfbf9;
+    --color-text-secondary: #a8a29e;
+    --color-text-muted: #78716c;
+
+    --orange-glow: rgba(255, 98, 0, 0.45);
+    --orange-subtle: rgba(255, 98, 0, 0.15);
+
+    --color-error: #f87171;
+    --color-error-bg: rgba(239, 68, 68, 0.12);
+    --color-success: #34d399;
+    --color-success-bg: rgba(16, 185, 129, 0.12);
+  }
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ==========================================================================
+   LAYOUT TOTALMENTE RESPONSIVO (LARGURA & ALTURA AUTOMÁTICA)
+   ========================================================================== */
+html, body {
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
+  accent-color: var(--primary);
+  position: relative;
+
+  /* Centralização adaptável com altura automática */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh; /* Altura dinâmica para suportar barras de navegadores mobile */
+  padding: clamp(1.5rem, 4vh, 4rem) clamp(1rem, 4vw, 2.5rem);
+}
+
+/* ==========================================================================
+   AMBIENT MOTION DESIGN (ORBES FLUTUANTES NO FUNDO)
+   ========================================================================== */
+.ambient-glow {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.65;
+  will-change: transform, opacity;
+}
+
+.glow-1 {
+  width: min(450px, 80vw);
+  height: min(450px, 80vw);
+  top: -10%;
+  right: -5%;
+  background: radial-gradient(circle, rgba(255, 122, 24, 0.35) 0%, rgba(255, 85, 0, 0.1) 70%, transparent 100%);
+  animation: floatOrb1 18s ease-in-out infinite alternate;
+}
+
+.glow-2 {
+  width: min(500px, 90vw);
+  height: min(500px, 90vw);
+  bottom: -15%;
+  left: -10%;
+  background: radial-gradient(circle, rgba(255, 98, 0, 0.25) 0%, rgba(253, 186, 116, 0.12) 70%, transparent 100%);
+  animation: floatOrb2 22s ease-in-out infinite alternate;
+}
+
+.glow-3 {
+  width: min(300px, 60vw);
+  height: min(300px, 60vw);
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255, 180, 120, 0.18) 0%, transparent 70%);
+  animation: floatOrb3 15s ease-in-out infinite alternate;
+}
+
+@keyframes floatOrb1 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-30px, 40px) scale(1.08); }
+  100% { transform: translate(25px, -20px) scale(0.95); }
+}
+
+@keyframes floatOrb2 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, -35px) scale(1.12); }
+  100% { transform: translate(-20px, 30px) scale(0.92); }
+}
+
+@keyframes floatOrb3 {
+  0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.3; }
+  50% { transform: translate(-45%, -55%) scale(1.15); opacity: 0.6; }
+  100% { transform: translate(-55%, -45%) scale(1); opacity: 0.4; }
+}
+
+/* ==========================================================================
+   CONTAINER FRAMELESS (SEM QUADROS OU CAIXAS PESADAS EM VOLTA)
+   ========================================================================== */
+.login-wrapper {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: min(100%, 420px);
+  margin: auto;
+  animation: entranceMotion 0.6s var(--ease-spring) both;
+}
+
+.login-frameless {
+  /* Sem bordas, sem fundo de cartão encaixotado, integrado à tela */
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes entranceMotion {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ==========================================================================
+   CABEÇALHO COM BADGE & MOTION
+   ========================================================================== */
+.login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  background: var(--primary-gradient);
+  color: var(--color-white);
+  box-shadow: 0 10px 25px -4px var(--orange-glow);
+  margin-bottom: 1.25rem;
+  transition: transform var(--transition-bounce), box-shadow var(--transition-bounce);
+}
+
+.brand-badge:hover {
+  transform: translateY(-3px) scale(1.05) rotate(2deg);
+  box-shadow: 0 15px 35px -2px var(--orange-glow);
+}
+
+.login-title {
+  font-size: clamp(1.6rem, 4vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: var(--color-text-primary);
+  margin-bottom: 0.4rem;
+  text-wrap: balance;
+}
+
+.login-subtitle {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  text-wrap: pretty;
+}
+
+/* ==========================================================================
+   ALERTAS
+   ========================================================================== */
+.form-alert {
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1.4;
+  animation: alertFadeIn 0.3s ease;
+}
+
+.form-alert[hidden] {
+  display: none !important;
+}
+
+.form-alert--error {
+  background-color: var(--color-error-bg);
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+}
+
+.form-alert--success {
+  background-color: var(--color-success-bg);
+  border: 1px solid var(--color-success);
+  color: var(--color-success);
+}
+
+@keyframes alertFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   CAMPOS FLUTUANTES (FLOATING LABELS) COM MOTION DESIGN
+   ========================================================================== */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.floating-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.floating-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: var(--color-input-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(8px);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.floating-field:hover {
+  border-color: var(--orange-300);
+}
+
+.floating-field:focus-within {
+  border-color: var(--primary);
+  background-color: var(--color-white);
+  box-shadow: 0 0 0 4px var(--orange-subtle), 0 8px 20px -6px rgba(255, 98, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+@media (prefers-color-scheme: dark) {
+  .floating-field:focus-within {
+    background-color: rgba(30, 25, 22, 0.95);
+  }
+}
+
+/* Ícone do campo */
+.field-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.floating-field:focus-within .field-icon {
+  color: var(--primary);
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Input do campo flutuante */
+.floating-input {
+  width: 100%;
+  min-height: 56px; /* Altura confortável para o efeito flutuante e alvo de toque */
+  font-family: inherit;
+  font-size: max(1rem, 1em);
+  color: var(--color-text-primary);
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 1.35rem 1rem 0.45rem 2.85rem;
+  border-radius: var(--radius-md);
+}
+
+/* O label flutuante */
+.floating-label {
+  position: absolute;
+  left: 2.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  pointer-events: none;
+  transform-origin: left top;
+  transition: transform 0.24s var(--ease-smooth), color 0.24s var(--ease-smooth), font-size 0.24s var(--ease-smooth);
+}
+
+/* Efeito Flutuante: quando o input está com foco OU contém texto */
+.floating-input:focus ~ .floating-label,
+.floating-input:not(:placeholder-shown) ~ .floating-label {
+  transform: translateY(-130%) scale(0.78);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Linha indicadora de foco com motion design */
+.field-indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 15%;
+  right: 15%;
+  height: 2px;
+  background: var(--primary-gradient);
+  border-radius: 2px;
+  transform: scaleX(0);
+  opacity: 0;
+  transition: transform 0.3s var(--ease-spring), opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.floating-field:focus-within .field-indicator {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+/* Validação não-intrusiva (:user-invalid) */
+.floating-input:user-invalid ~ .field-indicator {
+  background: var(--color-error);
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+.floating-field:has(.floating-input:user-invalid) {
+  border-color: var(--color-error);
+}
+
+.error-message {
+  font-size: 0.75rem;
+  color: var(--color-error);
+  min-height: 1.1rem;
+  padding-left: 0.5rem;
+}
+
+/* Botão de Exibir/Ocultar Senha */
+.password-toggle-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.password-toggle-btn:hover {
+  color: var(--primary);
+  transform: translateY(-50%) scale(1.12);
+}
+
+.password-toggle-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.password-toggle-btn .icon-eye-off {
+  display: none;
+}
+
+.password-toggle-btn[aria-pressed="true"] .icon-eye {
+  display: none;
+}
+
+.password-toggle-btn[aria-pressed="true"] .icon-eye-off {
+  display: block;
+}
+
+/* Ajuste do input de senha para dar espaço ao botão de olho */
+#password {
+  padding-right: 3rem;
+}
+
+/* ==========================================================================
+   OPÇÕES: LEMBRAR DE MIM & ESQUECI A SENHA
+   ========================================================================== */
+.form-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: -0.25rem;
+}
+
+.checkbox-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.checkbox-container:hover {
+  color: var(--color-text-primary);
+}
+
+.checkbox-container input[type="checkbox"] {
+  width: 1.2rem;
+  height: 1.2rem;
+  cursor: pointer;
+}
+
+.forgot-link {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.forgot-link:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+  transform: translateX(1px);
+}
+
+/* ==========================================================================
+   BOTÃO PRINCIPAL COM MOTION & GLOW
+   ========================================================================== */
+.btn-primary {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  width: 100%;
+  min-height: 52px;
+  background: var(--primary-gradient);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 10px 25px -5px var(--orange-glow);
+  transition: transform var(--transition-bounce), box-shadow var(--transition-bounce);
+  margin-top: 0.5rem;
+}
+
+.btn-primary::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  transition: left 0.6s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px -4px var(--orange-glow);
+}
+
+.btn-primary:hover::after {
+  left: 100%;
+}
+
+.btn-primary:hover .btn-arrow-icon {
+  transform: translateX(4px);
+}
+
+.btn-arrow-icon {
+  transition: transform var(--transition-bounce);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+  box-shadow: 0 6px 15px -3px var(--orange-glow);
+}
+
+.btn-primary:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   DIVISOR & LOGIN SOCIAL
+   ========================================================================== */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0 1.25rem;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.divider span {
+  padding: 0 0.875rem;
+}
+
+.social-login-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.875rem;
+}
+
+.btn-social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  min-height: 48px;
+  background-color: var(--color-input-bg);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.btn-social:hover {
+  background-color: var(--color-white);
+  border-color: var(--orange-300);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -4px rgba(255, 98, 0, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  .btn-social:hover {
+    background-color: rgba(35, 30, 27, 0.95);
+  }
+}
+
+.btn-social:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   RODAPÉ
+   ========================================================================== */
+.login-footer {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.signup-prompt {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.toggle-mode-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 0.35rem;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  color: var(--primary);
+  cursor: pointer;
+  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.toggle-mode-btn::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.25s var(--ease-smooth);
+}
+
+.toggle-mode-btn:hover {
+  color: var(--primary-hover);
+}
+
+.toggle-mode-btn:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.toggle-mode-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE ADAPTÁVEL
+   ========================================================================== */
+@media (max-width: 440px) {
+  body {
+    padding: clamp(1rem, 3vh, 2rem) 1rem;
+  }
+
+  .login-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .brand-badge {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 1rem;
+  }
+
+  .social-login-group {
+    grid-template-columns: 1fr;
+  }
+
+  .form-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

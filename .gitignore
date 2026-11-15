@@ -1,0 +1,18 @@
+# Dependências
+node_modules/
+package-lock.json
+
+# Banco de dados local e arquivos temporários SQLite
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Variáveis de ambiente com segredos
+.env
+.env.local
+
+# Logs e arquivos de sistema
+*.log
+.DS_Store
+Thumbs.db
