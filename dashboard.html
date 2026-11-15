@@ -2,41 +2,45 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Painel de controle do usuário autenticado">
-  <title>Painel do Usuário | SecureAuth</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Boas-vindas ao painel seguro do usuário">
+  <title>Boas-vindas | SecureAuth Hub</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="dashboard.css">
 </head>
 <body class="dashboard-body">
 
-  <!-- Tela de carregamento / verificação de segurança -->
+  <!-- Ambient Motion Design: Orbes de Luz e Brilho Laranja Vivo -->
+  <div class="ambient-glow glow-orange-1" aria-hidden="true"></div>
+  <div class="ambient-glow glow-orange-2" aria-hidden="true"></div>
+  <div class="ambient-glow glow-orange-3" aria-hidden="true"></div>
+
+  <!-- Tela de Carregamento & Verificação Inicial -->
   <div id="auth-loading" class="auth-loading">
-    <div class="spinner" aria-hidden="true"></div>
-    <p>Verificando credenciais de acesso seguro...</p>
+    <div class="spinner-ring" aria-hidden="true">
+      <div class="spinner-core"></div>
+    </div>
+    <p class="loading-text">Validando sua sessão segura...</p>
   </div>
 
-  <!-- Conteúdo Principal do Painel -->
+  <!-- Conteúdo Principal de Boas-Vindas -->
   <div id="dashboard-content" class="dashboard-content" hidden>
     
-    <!-- Barra Superior de Navegação -->
-    <header class="dashboard-header">
-      <div class="header-container">
-        <div class="header-brand">
-          <div class="brand-logo" aria-hidden="true">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Barra Superior Minimalista -->
+    <header class="top-nav">
+      <div class="nav-container">
+        <div class="nav-brand">
+          <div class="brand-mini-badge" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
           </div>
-          <span class="brand-name">SecureAuth Hub</span>
+          <span class="nav-title">SecureAuth</span>
         </div>
 
-        <div class="header-user-menu">
-          <div class="user-badge" id="user-badge">
-            <span class="user-avatar" id="user-avatar" aria-hidden="true">U</span>
-            <span class="user-email" id="header-user-email">carregando...</span>
-          </div>
-          <button type="button" id="btn-logout" class="btn-logout" aria-label="Encerrar sessão">
+        <div class="nav-user">
+          <span class="nav-user-email" id="header-user-email">...</span>
+          <button type="button" id="btn-logout" class="btn-logout-nav" aria-label="Sair da conta">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
               <polyline points="16 17 21 12 16 7"/>
@@ -48,164 +52,101 @@
       </div>
     </header>
 
-    <!-- Área Principal -->
-    <main class="dashboard-main">
-      <div class="dashboard-container">
+    <!-- Área Central de Apresentação -->
+    <main class="welcome-section">
+      <div class="welcome-card">
         
-        <!-- Banner de Boas-Vindas -->
-        <section class="welcome-banner">
-          <div class="welcome-text">
-            <span class="status-pill">
-              <span class="status-dot"></span> Sessão Segura Ativa
-            </span>
-            <h1 class="welcome-title">Olá, <span id="welcome-user-name">Usuário</span>! 👋</h1>
-            <p class="welcome-desc">Você acessou com sucesso a área restrita protegida por criptografia scrypt e SQLite.</p>
-          </div>
-          <div class="welcome-actions">
-            <button type="button" id="btn-refresh-session" class="btn-secondary">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 2v6h-6"/>
-                <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
-                <path d="M3 22v-6h6"/>
-                <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
-              </svg>
-              <span>Verificar Sessão</span>
-            </button>
-          </div>
-        </section>
+        <!-- Efeito de Brilho Dinâmico de Fundo no Card -->
+        <div class="card-glow-reflection" aria-hidden="true"></div>
 
-        <!-- Grid de Métricas / Status -->
-        <section class="metrics-grid">
+        <!-- Avatar com Anel Pulsante e Badge de Verificação -->
+        <div class="avatar-wrapper">
+          <div class="avatar-pulse-ring" aria-hidden="true"></div>
+          <div class="user-avatar-hero" id="user-avatar" aria-hidden="true">U</div>
+          <div class="verified-badge" title="Login Seguro Verificado" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Chip de Status Ativo -->
+        <div class="status-chip">
+          <span class="status-live-dot" aria-hidden="true"></span>
+          <span>Login Realizado com Sucesso</span>
+        </div>
+
+        <!-- Títulos de Boas-Vindas -->
+        <h1 class="hero-title">
+          Bem-vindo(a), <span class="highlight-name" id="welcome-user-name">Usuário</span>!
+        </h1>
+        <p class="hero-subtitle">
+          Sua identidade foi autenticada e protegida com criptografia ponta a ponta.
+        </p>
+
+        <!-- Três Cards de Destaque com Efeito Glassmorphism & Sombra Laranja -->
+        <div class="info-pills-grid">
           
-          <!-- Card 1: Conta -->
-          <article class="metric-card">
-            <div class="card-icon icon-shield" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="info-pill-item">
+            <div class="pill-icon icon-mail" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="16" x="2" y="4" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+              </svg>
+            </div>
+            <div class="pill-content">
+              <span class="pill-label">Conta Conectada</span>
+              <strong class="pill-value" id="detail-email">carregando...</strong>
+            </div>
+          </div>
+
+          <div class="info-pill-item">
+            <div class="pill-icon icon-shield" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                <polyline points="9 12 11 14 15 10"/>
               </svg>
             </div>
-            <div class="card-info">
-              <h2 class="card-label">Status da Conta</h2>
-              <p class="card-value text-success">Ativa e Protegida</p>
-              <span class="card-hint" id="account-created-at">Criada recentemente</span>
+            <div class="pill-content">
+              <span class="pill-label">Sessão Criptografada</span>
+              <strong class="pill-value text-accent">scrypt 512b Ativo</strong>
             </div>
-          </article>
+          </div>
 
-          <!-- Card 2: Criptografia -->
-          <article class="metric-card">
-            <div class="card-icon icon-key" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="7.5" cy="15.5" r="5.5"/>
-                <path d="m21 2-9.6 9.6"/>
-                <path d="m15.5 7.5 3 3L22 7l-3-3"/>
-              </svg>
-            </div>
-            <div class="card-info">
-              <h2 class="card-label">Segurança da Senha</h2>
-              <p class="card-value">Hash scrypt 512b</p>
-              <span class="card-hint">Salt único de 128 bits</span>
-            </div>
-          </article>
-
-          <!-- Card 3: Sessão -->
-          <article class="metric-card">
-            <div class="card-icon icon-clock" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="info-pill-item">
+            <div class="pill-icon icon-time" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
                 <polyline points="12 6 12 12 16 14"/>
               </svg>
             </div>
-            <div class="card-info">
-              <h2 class="card-label">Validade da Sessão</h2>
-              <p class="card-value" id="session-status">24 Horas</p>
-              <span class="card-hint" id="session-expires-hint">Expira em 1 dia</span>
+            <div class="pill-content">
+              <span class="pill-label">Horário de Entrada</span>
+              <strong class="pill-value" id="log-login-time">Agora</strong>
             </div>
-          </article>
+          </div>
 
-          <!-- Card 4: Banco de Dados -->
-          <article class="metric-card">
-            <div class="card-icon icon-db" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <ellipse cx="12" cy="5" rx="9" ry="3"/>
-                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-              </svg>
-            </div>
-            <div class="card-info">
-              <h2 class="card-label">Banco de Dados</h2>
-              <p class="card-value">SQLite (WAL)</p>
-              <span class="card-hint">Prepared Statements ativos</span>
-            </div>
-          </article>
+        </div>
 
-        </section>
+        <!-- Metadados Ocultos/Auxiliares para scripts existentes -->
+        <span id="detail-id" hidden></span>
+        <span id="detail-created" hidden></span>
+        <span id="account-created-at" hidden></span>
 
-        <!-- Detalhes da Sessão & Atividades -->
-        <div class="details-layout">
+        <!-- Ações do Usuário -->
+        <div class="welcome-actions">
+          <button type="button" id="btn-refresh-session" class="btn-hero-action">
+            <svg class="action-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 2v6h-6"/>
+              <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+              <path d="M3 22v-6h6"/>
+              <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+            </svg>
+            <span>Verificar Conexão</span>
+          </button>
           
-          <!-- Painel Esquerdo: Logs de Eventos de Segurança -->
-          <section class="panel-card">
-            <header class="panel-header">
-              <h2 class="panel-title">Auditoria de Acesso Recente</h2>
-              <span class="badge-neutral">Tempo Real</span>
-            </header>
-            
-            <ul class="activity-list">
-              <li class="activity-item">
-                <span class="activity-icon success" aria-hidden="true">✔</span>
-                <div class="activity-details">
-                  <p class="activity-text"><strong>Autenticação de credenciais aprovada</strong></p>
-                  <span class="activity-time" id="log-login-time">Agora mesmo</span>
-                </div>
-              </li>
-              <li class="activity-item">
-                <span class="activity-icon info" aria-hidden="true">🔑</span>
-                <div class="activity-details">
-                  <p class="activity-text">Token criptográfico de 256 bits gerado</p>
-                  <span class="activity-time">Armazenado com segurança</span>
-                </div>
-              </li>
-              <li class="activity-item">
-                <span class="activity-icon shield" aria-hidden="true">🛡️</span>
-                <div class="activity-details">
-                  <p class="activity-text">Proteção anti-força bruta ativa (0 falhas pendentes)</p>
-                  <span class="activity-time">Monitoramento ativo</span>
-                </div>
-              </li>
-            </ul>
-          </section>
-
-          <!-- Painel Direito: Dados do Usuário & Ações Rápidas -->
-          <section class="panel-card">
-            <header class="panel-header">
-              <h2 class="panel-title">Informações de Acesso</h2>
-            </header>
-
-            <div class="user-details-list">
-              <div class="detail-row">
-                <span class="detail-label">E-mail:</span>
-                <strong class="detail-value" id="detail-email">-</strong>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">ID no Banco:</span>
-                <span class="detail-value" id="detail-id">-</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Criação da Conta:</span>
-                <span class="detail-value" id="detail-created">-</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Ambiente:</span>
-                <span class="detail-value badge-local">Localhost (Node.js)</span>
-              </div>
-            </div>
-
-            <div class="panel-actions">
-              <a href="index.html" class="link-secondary">Voltar à tela de login</a>
-            </div>
-          </section>
-
+          <a href="index.html" class="btn-hero-secondary">
+            <span>Trocar de Conta</span>
+          </a>
         </div>
 
       </div>
